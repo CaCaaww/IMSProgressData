@@ -9,4 +9,8 @@ public interface imsProgGuiDao {
     imsProgGui[] getImsProgByType(String type);
 
     String[] getImsProgTypes();
+
+    imsProgGui addData(imsProgGui newData);
+
+    String partialPrint(imsProgGui[] data);
 }

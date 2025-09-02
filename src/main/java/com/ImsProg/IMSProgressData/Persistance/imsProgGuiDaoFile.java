@@ -1,8 +1,13 @@
 package com.ImsProg.IMSProgressData.Persistance;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,12 +24,17 @@ import com.opencsv.CSVReaderBuilder;
 public class imsProgGuiDaoFile implements imsProgGuiDao{
     
     private String FOLDER_PATH_FOLDER;
+    private String OUTPUT_PATH_FOLDER;
     private String FOLDER_PATH;
+    private String OUTPUT_PATH;
     private imsProgGui[] fileContents;
 
-    public imsProgGuiDaoFile(@Value("${csvFolder.path}") String FOLDER_PATH_FOLDER){
+    public imsProgGuiDaoFile(@Value("${csvFolder.path}") String FOLDER_PATH_FOLDER, @Value("${outputFolder.path}") String OUTPUT_PATH_FOLDER){
         this.FOLDER_PATH_FOLDER = FOLDER_PATH_FOLDER;
+        this.OUTPUT_PATH_FOLDER = OUTPUT_PATH_FOLDER;
+
         readFile();
+        SetOutPutFolderPath();
     }
 
     @Override
@@ -56,6 +66,51 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
         return set.toArray(new String[set.size()]);
     }
 
+    @Override
+    public imsProgGui addData(imsProgGui newData){
+        SetFolderPath();
+        String newLine = newData.getProgramName() + ',' + newData.getCust() + ',' + newData.getDescription() + ',' + newData.getUpdates() + ',' + newData.getType();
+        File file = new File(FOLDER_PATH);
+        try {
+            if (file.exists()) {
+                FileWriter file2 = new FileWriter(FOLDER_PATH, true);
+                // file.createNewFile();
+                BufferedWriter bw = new BufferedWriter(file2);
+                bw.append(newLine + "\n");
+                bw.close();
+                file2.close();   
+            } 
+            return newData;
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating CSV file", e);
+        }
+    }
+
+    @Override
+    public String partialPrint(imsProgGui[] data){
+        SetOutPutFolderPath();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss");
+        String date = LocalDateTime.now().format(formatter);
+        String fileName = OUTPUT_PATH + "partialPrint-" + date + ".txt";
+        File newFile = new File(fileName);
+        try {
+            if (!newFile.exists()) {
+                FileWriter file2 = new FileWriter(fileName);
+                BufferedWriter bw = new BufferedWriter(file2);
+                for (imsProgGui imsProgGui : data) {
+                    bw.write(imsProgGui.toString() + "\n");
+                }
+                bw.close();
+                file2.close();
+                return fileName;
+            } else {
+                return "Error";
+            }    
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating file", e);
+        }
+    }
+
     private void SetFolderPath(){
         try {
             Path path = Path.of(FOLDER_PATH_FOLDER);
@@ -64,6 +119,19 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
             // Printing the string
             System.out.println(str);
             FOLDER_PATH = str;
+        } catch (Exception e) {
+            System.out.println("error reading file location");
+            e.printStackTrace();
+        }
+    }
+    private void SetOutPutFolderPath(){
+        try {
+            Path path = Path.of(OUTPUT_PATH_FOLDER);
+            String str = Files.readString(path);
+
+            // Printing the string
+            System.out.println(str);
+            OUTPUT_PATH = str;
         } catch (Exception e) {
             System.out.println("error reading file location");
             e.printStackTrace();
