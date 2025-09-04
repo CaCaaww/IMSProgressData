@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.ImsProg.IMSProgressData.Model.imsProgGui;
@@ -97,9 +99,43 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
             if (!newFile.exists()) {
                 FileWriter file2 = new FileWriter(fileName);
                 BufferedWriter bw = new BufferedWriter(file2);
-                for (imsProgGui imsProgGui : data) {
-                    bw.write(imsProgGui.toString() + "\n");
+
+                //create list of rows
+                ArrayList<String[]> rows = new ArrayList<String[]>();
+                rows.add(new String[]{"Program Name", "Customer", "Description", "Updates", "Type"});
+                for (imsProgGui imsProgGui : data){
+                    rows.add(new String[]{imsProgGui.getProgramName(), imsProgGui.getCust(), imsProgGui.getDescription(), imsProgGui.getUpdates(), imsProgGui.getType()});
                 }
+                //count greatest length of each row
+                int[] colWidths = new int[rows.get(0).length];
+                for (String[] row : rows) {
+                    for (int i = 0; i < row.length; i++) {
+                        colWidths[i] = Math.max(colWidths[i], row[i].length());
+                    }
+                }
+                //build format string
+                StringBuilder formatBuilder = new StringBuilder();
+                formatBuilder.append("|");
+                for (int width : colWidths) {
+                    formatBuilder.append(" %-").append(width).append("s |");
+                }
+                String rowFormat = formatBuilder.toString();
+                // Build border line
+                StringBuilder borderBuilder = new StringBuilder();
+                borderBuilder.append("+");
+                for (int width : colWidths) {
+                    borderBuilder.append("-".repeat(width + 2)).append("+");
+                }
+                String border = borderBuilder.toString();
+                // write to file
+                bw.write(border + "\n");
+                for (int r = 0; r < rows.size(); r++) {
+                    bw.write(String.format(rowFormat + "%n", (Object[]) rows.get(r)));
+                    if (r == 0) { // after header row
+                        bw.write(border + "\n");
+                    }
+                }
+                bw.write(border);                
                 bw.close();
                 file2.close();
                 return fileName;
@@ -110,6 +146,20 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
             throw new RuntimeException("Error creating file", e);
         }
     }
+
+    @Override
+    public String[] getUserGroups(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        ArrayList<String> temp = new ArrayList<>();
+        auth.getAuthorities().forEach(authority -> {
+            System.out.println("User is in group: " + authority.getAuthority());
+            temp.add(authority.getAuthority());
+            
+        });
+        
+        return temp.toArray(new String[temp.size()]);
+    }
+    
 
     private void SetFolderPath(){
         try {
