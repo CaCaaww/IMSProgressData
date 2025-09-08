@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -89,17 +90,17 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
     }
 
     @Override
-    public String partialPrint(imsProgGui[] data){
+    public byte[] partialPrint(imsProgGui[] data){
         SetOutPutFolderPath();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss");
-        String date = LocalDateTime.now().format(formatter);
-        String fileName = OUTPUT_PATH + "partialPrint-" + date + ".txt";
-        File newFile = new File(fileName);
+        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-hhmmss");
+        //String date = LocalDateTime.now().format(formatter);
+        //String fileName = OUTPUT_PATH + "partialPrint-" + date + ".txt";
+        //File newFile = new File(fileName);
         try {
-            if (!newFile.exists()) {
-                FileWriter file2 = new FileWriter(fileName);
-                BufferedWriter bw = new BufferedWriter(file2);
-
+            //if (!newFile.exists()) {
+                //FileWriter file2 = new FileWriter(fileName);
+                //BufferedWriter bw = new BufferedWriter(file2);
+                String masterString = "";
                 //create list of rows
                 ArrayList<String[]> rows = new ArrayList<String[]>();
                 rows.add(new String[]{"Program Name", "Customer", "Description", "Updates", "Type"});
@@ -128,20 +129,27 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
                 }
                 String border = borderBuilder.toString();
                 // write to file
-                bw.write(border + "\n");
+                //bw.write(border + "\n");
+                masterString += border + "\n";
                 for (int r = 0; r < rows.size(); r++) {
-                    bw.write(String.format(rowFormat + "%n", (Object[]) rows.get(r)));
+                    //bw.write(String.format(rowFormat + "%n", (Object[]) rows.get(r)));
+                    masterString += String.format(rowFormat + "%n", (Object[]) rows.get(r));
                     if (r == 0) { // after header row
-                        bw.write(border + "\n");
+                        //bw.write(border + "\n");
+                        masterString += border + "\n";
                     }
                 }
-                bw.write(border);                
-                bw.close();
-                file2.close();
-                return fileName;
-            } else {
-                return "Error";
-            }    
+                //bw.write(border);      
+                masterString += border + "\n";
+                //return masterString;       
+                byte[] fileBytes = masterString.getBytes(StandardCharsets.UTF_8);  
+                return fileBytes; 
+                //bw.close();
+                //file2.close();
+                //return fileName;
+            //} else {
+            //    return "Error";
+            //}    
         } catch (Exception e) {
             throw new RuntimeException("Error creating file", e);
         }
@@ -154,7 +162,6 @@ public class imsProgGuiDaoFile implements imsProgGuiDao{
         auth.getAuthorities().forEach(authority -> {
             System.out.println("User is in group: " + authority.getAuthority());
             temp.add(authority.getAuthority());
-            
         });
         
         return temp.toArray(new String[temp.size()]);

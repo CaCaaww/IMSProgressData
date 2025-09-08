@@ -20,6 +20,11 @@ import com.ImsProg.IMSProgressData.Persistance.imsProgGuiDao;
 
 import io.micrometer.core.ipc.http.HttpSender.Response;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
+import java.nio.charset.StandardCharsets;
+
 @EnableAutoConfiguration
 @RestController
 @RequestMapping("/imsProg")
@@ -103,11 +108,14 @@ public class controller {
     }
 
     @PostMapping("/partialPrint")
-    public ResponseEntity<String> partialPrint(@RequestBody imsProgGui[] data){
+    public ResponseEntity<byte[]> partialPrint(@RequestBody imsProgGui[] data){
         LOG.info("POST /partialPrint");
         try {
-            String result = ImsProgGuiDao.partialPrint(data);
-            return new ResponseEntity<String>(result, HttpStatus.OK);
+            byte[] result = ImsProgGuiDao.partialPrint(data);
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"report.txt\"")
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(result);
         } catch (Exception e){
             LOG.log(Level.SEVERE, e.getLocalizedMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

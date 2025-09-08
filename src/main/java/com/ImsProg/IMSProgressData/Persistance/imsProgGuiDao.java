@@ -12,7 +12,7 @@ public interface imsProgGuiDao {
 
     imsProgGui addData(imsProgGui newData);
 
-    String partialPrint(imsProgGui[] data);
+    byte[] partialPrint(imsProgGui[] data);
 
     String[] getUserGroups();
 }
