@@ -21,22 +21,37 @@ public class imsProgGui {
 
     @JsonProperty("Program Name")
     public String getProgramName(){
+        if (programName.indexOf(",") != -1){
+            return "\"" + programName + "\"";
+        }
         return programName;
     }
     @JsonProperty("Cust")
     public String getCust(){
+        if (customer.indexOf(",") != -1){
+            return "\"" + customer + "\"";
+        }
         return customer;
     }
     @JsonProperty("Description")
     public String getDescription(){
+        if (description.indexOf(",") != -1){
+            return "\"" + description + "\"";
+        }
         return description;
     }
     @JsonProperty("Updates to TTM")
     public String getUpdates(){
+        if (updates.indexOf(",") != -1){
+            return "\"" + updates + "\"";
+        }
         return updates;
     }
     @JsonProperty("Type")
     public String getType(){
+        if (type.indexOf(",") != -1){
+            return "\"" + type + "\"";
+        }
         return type;
     }
 
@@ -64,6 +79,20 @@ public class imsProgGui {
     @Override
     public String toString(){
         return "imsProgGui[programName = " + programName + ", customer = " + customer + ", description = " + description + ", updates = " + updates + ", type = " + type + "]";
+    }
+
+    @Override
+    public boolean equals(Object other){
+        if (other instanceof imsProgGui){
+            imsProgGui other2 = (imsProgGui)other;
+            return (programName.equals(other2.programName)
+            && customer.equals(other2.customer)
+            && description.equals(other2.description)
+            && updates.equals(other2.updates)
+            && type.equals(other2.type));
+        } else {
+            return false;
+        }
     }
 
     

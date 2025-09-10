@@ -15,4 +15,8 @@ public interface imsProgGuiDao {
     byte[] partialPrint(imsProgGui[] data);
 
     String[] getUserGroups();
+
+    imsProgGui deleteImsProgGui(imsProgGui thisOne);
+
+    imsProgGui updateImsProgGui(imsProgGui[] objects);
 }
